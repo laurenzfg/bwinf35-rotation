@@ -38,6 +38,9 @@ private:
     void gravitation(char**&f);
     bool ist_loesung(char **f);
     void zeige_loesung(char **f, std::string l);
+		
+		unsigned char * berechne_hash(char **&f);
+		bool vergleiche_hashs(unsigned char * h1,unsigned char *h2);
 
 };
 
