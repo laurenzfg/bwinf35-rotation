@@ -8,10 +8,12 @@ rahmen::rahmen(const char* eingabedatei)
         std::cout<<"Eingabedatei lässt sich nicht öffnen."<<std::endl;
 
     }
+
     fseek(fp,0,SEEK_END);
     dateigroese=ftell(fp);
     fseek(fp,0,SEEK_SET);
     datei=new char[dateigroese];
+
     if(fread(datei,1,dateigroese,fp)!=dateigroese)
     {
         std::cout<<"Eingabedatei lässt sich nicht lesen."<<std::endl;
@@ -30,8 +32,7 @@ rahmen::rahmen(const char* eingabedatei)
 
     char ** feld;
     this->allocate_feld(feld);
-    this->allocate_feld(buffer_feld);
-
+	
     i++;
     for(unsigned int y=0;y<seitenlaenge;y++)
     {
@@ -42,14 +43,14 @@ rahmen::rahmen(const char* eingabedatei)
         }
     }
 
+		this->allocate_feld(buffer_feld);
     this->loese(feld);
-
 }
 
 void rahmen::allocate_feld(char **&f)
 {
     f = new char*[seitenlaenge];
-    for(unsigned int i = 0; i <= seitenlaenge; ++i)
+    for(unsigned int i = 0; i < seitenlaenge; ++i)
         f[i] = new char[seitenlaenge];
 }
 
@@ -75,7 +76,6 @@ bool rahmen::vergleiche(char **f1, char **f2)
             {
                 return false;
             }
-
         }
     }
     return true;
@@ -84,7 +84,6 @@ bool rahmen::vergleiche(char **f1, char **f2)
 void rahmen::zeige_feld(char **f)
 {
     std::cout<<std::endl;
-
     for(unsigned int y=0;y<seitenlaenge;y++)
     {
         for(unsigned int x=0;x<seitenlaenge;x++)
@@ -93,7 +92,6 @@ void rahmen::zeige_feld(char **f)
         }
         std::cout<<std::endl;
     }
-
     std::cout<<std::endl;
 }
 
@@ -145,18 +143,25 @@ void rahmen::gravitation(char **&f)
             {
                 zeichen=f[x][y];
                 benutzt[zeichen-'0']=true;
-
-                if(f[x-1][y]==zeichen)
+				
+								// Liegt der Stein wagrecht oder senkrecht?
+                if(f[x-1][y]==zeichen  && f[x][y]!=f[x+1][y])
                 {
                     richtung[0]=1;
                     richtung[1]=0;
                 }
-                if(f[x][y-1]==zeichen)
+                else if(f[x][y-1]==zeichen && f[x][y]!=f[x][y+1])
                 {
                     richtung[0]=0;
                     richtung[1]=1;
                 }
+								else
+								{
+										continue; 
+								}
 
+				
+								// Länge des Steins berechnen.
                 for(int i=1;true;i++)
                 {
                     if(x-richtung[0]*i<seitenlaenge && y-richtung[1]*i<seitenlaenge)
@@ -175,9 +180,11 @@ void rahmen::gravitation(char **&f)
                         break;
                     }
                 }
-
-                if(richtung[0]==0 && f[x][y]!=f[x][y+1])
+				
+								// Verschiebung für senkrechten Stein.
+                if(richtung[0]==0)
                 {
+										// Größe der Verschiebung berechnen.
                     for(verschiebung=1;true;verschiebung++)
                     {
                         if(f[x][y+verschiebung]!=' ')
@@ -186,7 +193,7 @@ void rahmen::gravitation(char **&f)
                             break;
                         }
                     }
-
+										// Verschiebung anwenden.
                     if(verschiebung>0)
                     {
 
@@ -203,8 +210,10 @@ void rahmen::gravitation(char **&f)
                         }
                     }
                 }
-                if(richtung[1]==0 && f[x][y]!=f[x+1][y])
+								// Verschiebung für wagrechten Stein.
+                if(richtung[1]==0)
                 {
+										// Größe der Verschiebung berechen.
                     for(verschiebung=1;true;verschiebung++)
                     {
                         t_bool=true;
@@ -224,8 +233,8 @@ void rahmen::gravitation(char **&f)
                             verschiebung--;
                             break;
                         }
-                    }
-
+                    }				
+										// Verschiebung anwenden.
                     if(verschiebung>0)
                     {
                         for(int i=0;i<laenge;i++)
@@ -240,14 +249,12 @@ void rahmen::gravitation(char **&f)
                         }
                     }
                 }
-
             }
         }
     }
-
 }
 
-int rahmen::ist_loesung(char **f)
+bool rahmen::ist_loesung(char **f)
 {
     unsigned int x,y;
     y=0;
@@ -289,35 +296,43 @@ int rahmen::ist_loesung(char **f)
 void rahmen::loese(char **f)
 {
     std::vector<std::vector<char **> > baum;
-    std::vector<std::vector<std::string>> loes;
+    std::vector<std::vector<std::string>> protokol;
+
     baum.push_back(std::vector<char**>());
-    loes.push_back(std::vector<std::string>());
+    protokol.push_back(std::vector<std::string>());
+
     baum.at(0).push_back(f);
-    loes.at(0).push_back("");
+    protokol.at(0).push_back("");
+
     bool t_bool;
     for(unsigned int ebene=0;true;ebene++)
     {
         baum.push_back(std::vector<char**>());
-        loes.push_back(std::vector<std::string>());
-
+        protokol.push_back(std::vector<std::string>());
+				
+				// Abbruchkriterium
         if(baum.at(ebene).size()==0)
         {
             std::cout<<"Ebene : "<<ebene<<"  Groese : "<<baum.at(ebene).size()<<" Zuwachsrate : "<<((double)baum.at(ebene).size())/((double)baum.at(ebene-1).size()*2)<<std::endl;
             std::cout<<"Keine Loesung vorhanden."<<std::endl;
             return;
         }
+				
+				// Verzweigungen berechnen.
         for(unsigned int k=0;k<baum.at(ebene).size();k++)
         {
+						// Erst für die Rotation nach links ...
             this->allocate_feld(f);
             this->kopiere_feld(baum.at(ebene).at(k),f);
             this->rotieren_links(f);
+
             if(this->ist_loesung(f))
             {
-                this->zeige_loesung(baum.at(0).at(0),loes.at(ebene).at(k)+"l");
+                this->zeige_loesung(baum.at(0).at(0),protokol.at(ebene).at(k)+"l");
                 return;
             }
 
-
+						// Überprüfe ob Zustand bekannt. Wenn nicht, füge nächster Ebene des Baums neuen Zustand hinzu.
             t_bool=false;
             for(unsigned int i=0;i<baum.size();i++)
             {
@@ -331,19 +346,21 @@ void rahmen::loese(char **f)
             if(!t_bool)
             {
                 baum.at(ebene+1).push_back(f);
-                loes.at(ebene+1).push_back(loes.at(ebene).at(k)+"l");
+                protokol.at(ebene+1).push_back(protokol.at(ebene).at(k)+"l");
             }
 
-
+						// ... dann für die Rotation nach rechts.
             this->allocate_feld(f);
             this->kopiere_feld(baum.at(ebene).at(k),f);
             this->rotieren_rechts(f);
+
             if(this->ist_loesung(f))
             {
-                this->zeige_loesung(baum.at(0).at(0),loes.at(ebene).at(k)+"r");
+                this->zeige_loesung(baum.at(0).at(0),protokol.at(ebene).at(k)+"r");
                 return;
             }
-
+						
+						// Überprüfe ob Zustand bekannt. Wenn nicht, füge nächster Ebene des Baums neuen Zustand hinzu.
             t_bool=false;
             for(unsigned int i=0;i<baum.size();i++)
             {
@@ -357,15 +374,13 @@ void rahmen::loese(char **f)
             if(!t_bool)
             {
                 baum.at(ebene+1).push_back(f);
-                loes.at(ebene+1).push_back(loes.at(ebene).at(k)+"r");
+                protokol.at(ebene+1).push_back(protokol.at(ebene).at(k)+"r");
             }
-
-
         }
+				// Ebeneninformationen ausgeben.
         if(ebene!=0)
-        std::cout<<"Ebene : "<<ebene<<"  Groese : "<<baum.at(ebene).size()<<" Zuwachsrate : "<<((double)baum.at(ebene).size())/((double)baum.at(ebene-1).size()*2)<<std::endl;
+        		std::cout<<"Ebene : "<<ebene<<"  Groese : "<<baum.at(ebene).size()<<" Zuwachsrate : "<<((double)baum.at(ebene).size())/((double)baum.at(ebene-1).size()*2)<<std::endl;
     }
-
 }
 
 void rahmen::zeige_loesung(char **f,std::string l)
@@ -382,9 +397,6 @@ void rahmen::zeige_loesung(char **f,std::string l)
             this->rotieren_links(f);
         }
         this->zeige_feld(f);
-
     }
     return;
 }
-
-

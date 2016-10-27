@@ -23,27 +23,21 @@ public:
 
 private:
     unsigned int dateigroese;
-    char *datei;
+    char * datei;
     unsigned int seitenlaenge;
+		char ** buffer_feld;	
 
-    char ** buffer_feld;
-    std::vector<char **> felder;
-    std::vector<std::string> loesungen;
-
-    void allocate_feld(char **&f);
+ 		void loese(char **f);
+    
+		void allocate_feld(char **&f);
     void kopiere_feld(char **&quelle, char **&ziel);
     bool vergleiche(char **f1, char **f2);
-
     void zeige_feld(char **f);
-
     void rotieren_links(char **&f);
     void rotieren_rechts(char **&f);
     void gravitation(char**&f);
-    int ist_loesung(char **f);
-
-    void loese(char **f);
-
-    void zeige_loesung(char **f, std::__cxx11::string l);
+    bool ist_loesung(char **f);
+    void zeige_loesung(char **f, std::string l);
 
 };
 
