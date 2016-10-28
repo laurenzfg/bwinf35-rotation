@@ -287,10 +287,10 @@ void rahmen::loese(char **f)
 {
     std::vector<std::vector<char **> > baum;
     std::vector<std::vector<std::string>> protokol;
-    std::vector<std::vector<unsigned char *>> hashs;
+    std::vector<std::vector<char *>> hashs;
 
     baum.push_back(std::vector<char**>());
-    hashs.push_back(std::vector<unsigned char*>());
+    hashs.push_back(std::vector<char*>());
     protokol.push_back(std::vector<std::string>());
 
     baum.at(0).push_back(f);
@@ -298,11 +298,11 @@ void rahmen::loese(char **f)
 		hashs.at(0).push_back(this->berechne_hash(f));
 
     bool t_bool;
-		unsigned char * t_hash;
+		char * t_hash;
     for(unsigned int ebene=0;true;ebene++)
     {
         baum.push_back(std::vector<char**>());
-        hashs.push_back(std::vector<unsigned char*>());
+        hashs.push_back(std::vector<char*>());
         protokol.push_back(std::vector<std::string>());
 				
 				// Abbruchkriterium
@@ -330,9 +330,9 @@ void rahmen::loese(char **f)
 						// Überprüfe ob Zustand bekannt. Wenn nicht, füge nächster Ebene des Baums neuen Zustand hinzu.
             t_bool=false;
 						t_hash=berechne_hash(f);
-            for(unsigned int i=0;i<baum.size();i++)
+            for(int i=hashs.size()-1;i>-1;i--)
             {
-                for(unsigned int i2=0;i2<baum.at(i).size();i2++)
+                for(int i2=0;i2<hashs.at(i).size();i2++)
                 {
                     t_bool=this->vergleiche_hashs(t_hash,hashs.at(i).at(i2));
                     if(t_bool) break;
@@ -360,9 +360,9 @@ void rahmen::loese(char **f)
 						// Überprüfe ob Zustand bekannt. Wenn nicht, füge nächster Ebene des Baums neuen Zustand hinzu.
             t_bool=false;
 						t_hash=berechne_hash(f);
-            for(unsigned int i=0;i<baum.size();i++)
+            for(int i=hashs.size()-1;i>-1;i--)
             {
-                for(unsigned int i2=0;i2<baum.at(i).size();i2++)
+                for(int i2=0;i2<hashs.at(i).size();i2++)
                 {
                     t_bool=this->vergleiche_hashs(t_hash,hashs.at(i).at(i2));
                     if(t_bool) break;
@@ -402,9 +402,9 @@ void rahmen::zeige_loesung(char **f,std::string l)
 }
 
 
-unsigned char * rahmen::berechne_hash(char **&f)
+char * rahmen::berechne_hash(char **&f)
 {
-		unsigned char * hash=new unsigned char[20];
+		char * hash=new char[20];
   	bool benutzt[10];
 		for(int i=0;i<10;i++)
     {
@@ -427,14 +427,12 @@ unsigned char * rahmen::berechne_hash(char **&f)
 		return hash;
 }
 
-bool rahmen::vergleiche_hashs(unsigned char * h1,unsigned char *h2)
+bool rahmen::vergleiche_hashs(const char * h1,const char *h2)
 {
-		for(int i=0;i<20;i++)
-		{
-				if(h1[i]!=h2[i])
-						return false;
-		}
-		return true;
+		if(strncmp(h1,h2,20)==0)
+					return true;
+		
+		return false;
 }
 
 
