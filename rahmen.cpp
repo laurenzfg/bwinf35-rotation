@@ -65,22 +65,6 @@ void rahmen::kopiere_feld(char **&quelle, char **&ziel)
     }
 }
 
-bool rahmen::vergleiche(char **f1, char **f2)
-{
-    bool t_bool=true;
-    for(unsigned int y=seitenlaenge-2;y>=1;y--)
-    {
-        for(unsigned int x=seitenlaenge-2;x>=1;x--)
-        {
-            if(f1[x][y]!=f2[x][y])
-            {
-                return false;
-            }
-        }
-    }
-    return true;
-}
-
 void rahmen::zeige_feld(char **f)
 {
     std::cout<<std::endl;

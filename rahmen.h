@@ -34,7 +34,6 @@ private:
     
 		void allocate_feld(char **&f);
     void kopiere_feld(char **&quelle, char **&ziel);
-    bool vergleiche(char **f1, char **f2);
     void zeige_feld(char **f);
     void rotieren_links(char **&f);
     void rotieren_rechts(char **&f);
